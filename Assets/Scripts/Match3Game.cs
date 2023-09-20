@@ -10,7 +10,6 @@ public class Match3Game : MonoBehaviour
 	
 	private Grid2D<TileState> _grid;
 	private List<Match> _matches;
-	private int _scoreMultiplier;
 	private const int MinTileState = 1;
 	private const int MaxTileState = 8;
 
@@ -48,7 +47,6 @@ public class Match3Game : MonoBehaviour
 
 	public bool TryMove (Move move)
 	{
-		_scoreMultiplier = 1;
 		_grid.Swap(move.From, move.To);
 		if (FindMatches())
 		{
@@ -79,8 +77,8 @@ public class Match3Game : MonoBehaviour
 
 			var score = new SingleScore
 			{
-				Position = match.Coordinates + (float2)step * (match.Length - 1) * 0.5f,
-				Value = match.Length * _scoreMultiplier++
+				Position = match.Coordinates  + (float2)step * (match.Length - 1) * 0.5f,
+				Value = match.Length * (match.Length - 2)
 			};
 			Scores.Add(score);
 			TotalScore += score.Value;

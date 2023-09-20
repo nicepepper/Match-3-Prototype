@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using Unity.Mathematics;
 using UnityEngine;
@@ -15,9 +16,11 @@ public class Match3Skin : MonoBehaviour
 	[SerializeField, Range(0f, 10f)] private float _newDropOffset = 2f;
 	[SerializeField] private TileSwapper _tileSwapper;
 
+	[SerializeField] private float2 _tileOffset;
+	[SerializeField] private float _betweenTiles = 0.65f;
+	
 	private float _busyDuration;
 	private Grid2D<Tile> _tiles;
-	private float2 _tileOffset;
 	private float _floatingScoreZ;
 
 	public bool IsBusy => _busyDuration > 0f;
@@ -28,8 +31,9 @@ public class Match3Skin : MonoBehaviour
 		_totalScoreText.SetText("0");
 		_gameOverText.gameObject.SetActive(false);
 		_game.StartNewGame();
-		_tileOffset = -0.5f * (float2)(_game.Size - 1);
-		
+		_tileOffset.x = -0.319f * (_game.Size.x - 1);
+		_tileOffset.y = -0.504f * (_game.Size.y - 1);
+
 		if (_tiles.IsUndefined)
 		{
 			_tiles = new Grid2D<Tile>(_game.Size);
@@ -91,7 +95,7 @@ public class Match3Skin : MonoBehaviour
 		float2 b = ScreenToTileSpace(end);
 		
 		var move = new Move(
-			(int2)floor(a), (b - a) switch
+			(int2)(a / _betweenTiles), (b - a) switch
 			{
 				var d when d.x > _dragThreshold => MoveDirection.Right,
 				var d when d.x < -_dragThreshold => MoveDirection.Left,
@@ -101,10 +105,7 @@ public class Match3Skin : MonoBehaviour
 			}
 		);
 		
-		if (
-			move.IsValid &&
-			_tiles.AreValidCoordinates(move.From) && _tiles.AreValidCoordinates(move.To)
-			)
+		if (move.IsValid && _tiles.AreValidCoordinates(move.From) && _tiles.AreValidCoordinates(move.To))
 		{
 			DoMove(move);
 			return false;
@@ -130,7 +131,7 @@ public class Match3Skin : MonoBehaviour
 			}
 			_tiles[drop.Coordinates] = tile;
 			_busyDuration = Mathf.Max(
-				tile.Fall(drop.Coordinates.y + _tileOffset.y, _dropSpeed), 
+				tile.Fall(drop.Coordinates.y * _betweenTiles + _tileOffset.y, _dropSpeed), 
 				_busyDuration
 				);
 		}
@@ -154,8 +155,8 @@ public class Match3Skin : MonoBehaviour
 			SingleScore score = _game.Scores[i];
 			_floatingScorePrefab.Show(
 				new Vector3(
-					score.Position.x + _tileOffset.x,
-					score.Position.y + _tileOffset.y,
+					score.Position.x * _betweenTiles + _tileOffset.x,
+					score.Position.y * _betweenTiles + _tileOffset.y,
 					_floatingScoreZ
 				),
 				score.Value
@@ -167,12 +168,13 @@ public class Match3Skin : MonoBehaviour
 	private void DoMove (Move move)
 	{
 		bool succcess = _game.TryMove(move);
-		Tile a = _tiles[move.From], b = _tiles[move.To];
-		_busyDuration = _tileSwapper.Swap(a, b, !succcess);
+		Tile first = _tiles[move.From];
+		Tile second = _tiles[move.To];
+		_busyDuration = _tileSwapper.Swap(first, second, !succcess);
 		if (succcess)
 		{
-			_tiles[move.From] = b;
-			_tiles[move.To] = a;
+			_tiles[move.From] = second;
+			_tiles[move.To] = first;
 		}
 	}
 
@@ -180,11 +182,11 @@ public class Match3Skin : MonoBehaviour
 	{
 		Ray ray = Camera.main.ScreenPointToRay(screenPosition);
 		Vector3 p = ray.origin - ray.direction * (ray.origin.z / ray.direction.z);
-		return float2(p.x - _tileOffset.x + 0.5f, p.y - _tileOffset.y + 0.5f);
+		return float2(p.x - _tileOffset.x + 0.3f, p.y - _tileOffset.y + 0.3f);
 	}
 
 	private Tile SpawnTile(TileState t, float x, float y)
 	{
-		return _tilePrefabs[(int)t - 1].Spawn(new Vector3(x + _tileOffset.x, y + _tileOffset.y));
+		return _tilePrefabs[(int)t - 1].Spawn(new Vector3(x * _betweenTiles + _tileOffset.x, y * _betweenTiles + _tileOffset.y));
 	}
 }

@@ -28,7 +28,10 @@ public class Tile : MonoBehaviour
         return instance;
     }
 
-    public void Despawn () => _pool.Recycle(this);
+    public void Despawn()
+    {
+        _pool.Recycle(this);
+    }
 
     public float Disappear ()
     {
@@ -57,8 +60,7 @@ public class Tile : MonoBehaviour
                 Despawn();
                 return;
             }
-            transform.localScale =
-                Vector3.one * (1f - _disappearProgress / _disappearDuration);
+            transform.localScale = Vector3.one * (1f - _disappearProgress / _disappearDuration);
         }
 
         if (_falling.Progress >= 0f)

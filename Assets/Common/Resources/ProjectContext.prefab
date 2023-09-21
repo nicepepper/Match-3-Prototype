@@ -74,3 +74,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 61d6c261805f8f542a33a7e2793d3592, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  InputMousePrefab: {fileID: 756404449131716991, guid: 95b4d36d7051e5541a6bb28b3f8ad3f9, type: 3}

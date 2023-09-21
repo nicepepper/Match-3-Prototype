@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
+using Zenject;
 
 public class Game : MonoBehaviour
 {
@@ -7,6 +9,17 @@ public class Game : MonoBehaviour
 
     private Vector3 _dragStart;
     private bool _isDragging;
+    
+    /*private IInputService _inputService;
+    private Vector3 _inputPosition;
+    private bool _isInput = false;
+
+    [Inject]
+    public void Construct(IInputService inputService)
+    {
+        _inputService = inputService;
+        _inputService.OnClick += OnClick;
+    }*/
 
     private void Awake ()
     {
@@ -27,7 +40,19 @@ public class Game : MonoBehaviour
         {
             _match3.StartNewGame();
         }
+        
     }
+
+    /*private void OnDestroy()
+    {
+        _inputService.OnClick -= OnClick;
+    }
+
+    private void OnClick(Vector3 position)
+    {
+        _inputPosition = position;
+        _isInput = true;
+    }*/
 	
     private void HandleInput ()
     {
@@ -40,7 +65,7 @@ public class Game : MonoBehaviour
             _dragStart = Input.mousePosition;
             _isDragging = true;
         }
-        else if (_isDragging && Input.GetMouseButton(0))
+        else if (_isDragging && Input.GetMouseButtonDown(0))
         {
             _isDragging = _match3.EvaluateDrag(_dragStart, Input.mousePosition);
         }
